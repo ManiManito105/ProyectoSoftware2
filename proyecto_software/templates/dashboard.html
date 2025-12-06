@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Dashboard - Inventario</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+  </head>
+  <body>
+    <header>
+      <h1>Dashboard</h1>
+      <nav>
+        <a href="/productos">Productos</a>
+        <a href="/movimientos">Movimientos</a>
+        <a href="/reportes">Reportes</a>
+        <button id="logoutBtn">Cerrar sesión</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section id="resumen"></section>
+      <section>
+        <h2>Movimientos recientes</h2>
+        <ul id="movimientosList"></ul>
+      </section>
+      <section>
+        <h2>Productos críticos</h2>
+        <ul id="productosCriticos"></ul>
+      </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

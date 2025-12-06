@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Inventario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* Login Page */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .login-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #777;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Main App */
+        #app {
+            display: none;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background-color: var(--primary);
+            text-align: center;
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .sidebar-menu ul {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+        
+        .sidebar-menu li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-menu li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-menu li.active {
+            background-color: rgba(255,255,255,0.1);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .sidebar-menu li:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .header h1 {
+            color: var(--secondary);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .card-icon.primary {
+            background-color: var(--primary);
+        }
+        
+        .card-icon.success {
+            background-color: var(--success);
+        }
+        
+        .card-icon.warning {
+            background-color: var(--warning);
+        }
+        
+        .card-icon.danger {
+            background-color: var(--danger);
+        }
+        
+        .card-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .card-title {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Forms */
+        .form-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Badges */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge.success {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .badge.warning {
+            background-color: #fff3e0;
+            color: var(--warning);
+        }
+        
+        .badge.danger {
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+        
+        .badge.primary {
+            background-color: #e3f2fd;
+            color: var(--primary);
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error message */
+        .error-message {
+            display: none;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1><i class="fas fa-warehouse"></i> InventarioPro</h1>
+                <p>Sistema de Gestión de Inventario</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" placeholder="Ingrese su usuario" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+                </div>
+                
+                <button type="submit">Iniciar Sesión</button>
+                
+                <div style="margin-top: 20px; text-align: center; font-size: 14px; color: #777;">
+                    <p><strong>Credenciales de prueba:</strong></p>
+                    <p>Usuario: admin</p>
+                    <p>Contraseña: admin123</p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="app" class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-warehouse"></i> InventarioPro</h2>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li class="active" data-section="dashboard"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li data-section="products"><a href="#"><i class="fas fa-boxes"></i> Productos</a></li>
+                    <li data-section="movements"><a href="#"><i class="fas fa-exchange-alt"></i> Movimientos</a></li>
+                    <li data-section="reports"><a href="#"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                    <li data-section="users"><a href="#"><i class="fas fa-users"></i> Usuarios</a></li>
+                    <li id="logout-btn"><a href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="section-title">Dashboard</h1>
+                <div class="user-info">
+                    <div>
+                        <div id="user-name">Administrador</div>
+                        <div id="user-role" class="badge success">Administrador</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading -->
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Cargando...</p>
+            </div>
+            
+            <!-- Error Message -->
+            <div id="error-message" class="error-message"></div>
+            
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <div class="cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value" id="total-products">0</div>
+                                <div class="card-title">Productos en Stock</div>
+                            </div>
+                            <div class="card-icon primary">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value" id="inventory-value">$0</div>
+                                <div class="card-title">Valor Total Inventario</div>
+                            </div>
+                            <div class="card-icon success">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value" id="low-stock-products">0</div>
+                                <div class="card-title">Productos con Stock Bajo</div>
+                            </div>
+                            <div class="card-icon warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value" id="today-movements">0</div>
+                                <div class="card-title">Movimientos Hoy</div>
+                            </div>
+                            <div class="card-icon danger">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <h2>Movimientos Recientes</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-movements-table">
+                            <!-- Los movimientos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-container">
+                    <h2>Productos con Stock Bajo</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="low-stock-table">
+                            <!-- Los productos con stock bajo se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Products Section -->
+            <div id="products" class="section">
+                <div class="header">
+                    <h1>Gestión de Productos</h1>
+                    <button id="add-product-btn"><i class="fas fa-plus"></i> Agregar Producto</button>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Stock</th>
+                                <th>Precio</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table">
+                            <!-- Los productos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Movements Section -->
+            <div id="movements" class="section">
+                <div class="header">
+                    <h1>Registro de Movimientos</h1>
+                    <div>
+                        <button id="add-entry-btn"><i class="fas fa-plus"></i> Entrada</button>
+                        <button id="add-exit-btn"><i class="fas fa-minus"></i> Salida</button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="movements-table">
+                            <!-- Los movimientos se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Reports Section -->
+            <div id="reports" class="section">
+                <div class="header">
+                    <h1>Reportes de Inventario</h1>
+                </div>
+                
+                <div class="cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value">Niveles de Stock</div>
+                                <div class="card-title">Reporte por categoría y producto</div>
+                            </div>
+                            <div class="card-icon primary">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value">Historial</div>
+                                <div class="card-title">Movimientos y transacciones</div>
+                            </div>
+                            <div class="card-icon success">
+                                <i class="fas fa-history"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value">Ventas</div>
+                                <div class="card-title">Productos más vendidos</div>
+                            </div>
+                            <div class="card-icon warning">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-value">Rotación</div>
+                                <div class="card-title">Productos con menos movimiento</div>
+                            </div>
+                            <div class="card-icon danger">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alerts Section -->
+                <!-- Alerts section removed -->
+            
+            <!-- Users Section -->
+            <div id="users" class="section">
+                <div class="header">
+                    <h1>Gestión de Usuarios</h1>
+                    <button id="add-user-btn"><i class="fas fa-plus"></i> Agregar Usuario</button>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Último Acceso</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                            <!-- Los usuarios se cargarán con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ==================== CONFIGURACIÓN ====================
+    const API_BASE = 'http://localhost:5000/api';
+    
+    // Almacenamiento local
+    const storage = {
+        getToken: () => localStorage.getItem('authToken'),
+        setToken: (token) => localStorage.setItem('authToken', token),
+        removeToken: () => localStorage.removeItem('authToken'),
+        getUser: () => JSON.parse(localStorage.getItem('userInfo') || 'null'),
+        setUser: (user) => localStorage.setItem('userInfo', JSON.stringify(user)),
+        removeUser: () => localStorage.removeItem('userInfo'),
+        getLastSection: () => localStorage.getItem('lastSection') || 'dashboard',
+        setLastSection: (section) => localStorage.setItem('lastSection', section)
+    };
+
+    // ==================== FUNCIONES DE API ====================
+
+    // Función principal para llamadas API
+    async function apiCall(endpoint, options = {}) {
+        const token = storage.getToken();
+        
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+            ...options,
+        };
+
+        // Agregar token si existe
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}${endpoint}`, config);
+            
+            // Si recibimos 401, intentar refrescar el token
+            if (response.status === 401) {
+                const refreshResult = await refreshToken();
+                
+                if (refreshResult.success) {
+                    // Reintentar con nuevo token
+                    config.headers.Authorization = `Bearer ${refreshResult.token}`;
+                    const retryResponse = await fetch(`${API_BASE}${endpoint}`, config);
+                    
+                    if (retryResponse.ok) {
+                        return await retryResponse.json();
+                    }
+                }
+                
+                // Si falla el refresh, redirigir al login
+                redirectToLogin();
+                throw new Error('Sesión expirada');
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Error ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    }
+
+    // Refrescar token
+    async function refreshToken() {
+        try {
+            const token = storage.getToken();
+            if (!token) return { success: false };
+
+            const response = await fetch(`${API_BASE}/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                storage.setToken(data.token);
+                storage.setUser(data.user);
+                return { success: true, token: data.token };
+            }
+        } catch (error) {
+            console.error('Error refreshing token:', error);
+        }
+
+        return { success: false };
+    }
+
+    // ==================== AUTENTICACIÓN ====================
+
+    // Login
+    async function login(username, password) {
+        try {
+            const response = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error en el login');
+            }
+
+            // API devuelve: { access_token: ..., usuario: { ... } }
+            storage.setToken(data.access_token);
+            storage.setUser(data.usuario);
+
+            return { success: true, user: data.usuario };
+        } catch (error) {
+            console.error('Login error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Logout
+    function logout() {
+        storage.removeToken();
+        storage.removeUser();
+        redirectToLogin();
+    }
+
+    // Redirigir al login
+    function redirectToLogin() {
+        storage.removeToken();
+        storage.removeUser();
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+    }
+
+    // Verificar autenticación
+    function checkAuth() {
+        const token = storage.getToken();
+        const user = storage.getUser();
+        
+        if (!token || !user) {
+            redirectToLogin();
+            return false;
+        }
+        
+        return true;
+    }
+
+    // ==================== FUNCIONES DE DATOS ====================
+
+    // Cargar dashboard
+    async function loadDashboard() {
+        try {
+            const resp = await apiCall('/dashboard');
+            // El endpoint /api/dashboard devuelve { resumen: {...}, movimientos_recientes: [...], productos_criticos: [...] }
+            if (resp && resp.resumen) {
+                // Productos críticos devueltos por el endpoint (pueden estar vacíos)
+                let productosCriticos = resp.productos_criticos || [];
+
+                // Si no hay productos críticos pero el resumen indica que existen productos con stock bajo,
+                // hacemos una llamada a /productos y filtramos localmente para mostrar aquellos con stock < stock_minimo.
+                if ((!productosCriticos || productosCriticos.length === 0) && resp.resumen && resp.resumen.productos_stock_bajo > 0) {
+                    try {
+                        const allProductsResp = await loadProducts();
+                        if (allProductsResp && allProductsResp.success && Array.isArray(allProductsResp.data)) {
+                            const filtered = allProductsResp.data.filter(p => (p.stock_actual || 0) < (p.stock_minimo || 0));
+                            // Tomar hasta 5 para mantener consistencia con el endpoint
+                            productosCriticos = filtered.slice(0, 5);
+                        }
+                    } catch (e) {
+                        console.error('No se pudieron obtener productos para filtrar stock bajo:', e);
+                    }
+                }
+
+                return {
+                    success: true,
+                    data: {
+                        estadisticas: {
+                            total_productos: resp.resumen.total_productos,
+                            productos_stock_bajo: resp.resumen.productos_stock_bajo,
+                            movimientos_hoy: resp.resumen.movimientos_hoy,
+                            valor_inventario: resp.resumen.valor_inventario
+                        },
+                        movimientos_recientes: resp.movimientos_recientes || [],
+                        productos_stock_bajo: productosCriticos || []
+                    }
+                };
+            }
+            return resp;
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            
+            // Si hay error de conexión, mostrar datos de demo
+            if (error.message.includes('Failed to fetch')) {
+                return getDemoDashboardData();
+            }
+            throw error;
+        }
+    }
+
+    // Cargar productos
+    async function loadProducts() {
+        try {
+            const resp = await apiCall('/productos');
+            // Mapear a la estructura esperada por updateProductsUI
+            if (resp && resp.productos) return { success: true, data: resp.productos };
+            if (Array.isArray(resp)) return { success: true, data: resp };
+            return resp;
+        } catch (error) {
+            console.error('Error loading products:', error);
+            
+            // Datos de demo
+            if (error.message.includes('Failed to fetch')) {
+                return getDemoProductsData();
+            }
+            throw error;
+        }
+    }
+
+    // Cargar movimientos
+    async function loadMovements() {
+        try {
+            const resp = await apiCall('/movimientos');
+            if (resp && resp.movimientos) return { success: true, data: resp.movimientos };
+            if (Array.isArray(resp)) return { success: true, data: resp };
+            return resp;
+        } catch (error) {
+            console.error('Error loading movements:', error);
+            
+            // Datos de demo
+            if (error.message.includes('Failed to fetch')) {
+                return getDemoMovementsData();
+            }
+            throw error;
+        }
+    }
+
+    // Cargar alertas
+    // loadAlerts removed: Alerts UI/section has been removed from the frontend.
+
+    // Cargar usuarios
+    async function loadUsers() {
+        try {
+            const resp = await apiCall('/usuarios');
+            if (Array.isArray(resp)) return { success: true, data: resp };
+            return resp;
+        } catch (error) {
+            console.error('Error loading users:', error);
+            
+            // Datos de demo
+            if (error.message.includes('Failed to fetch')) {
+                return getDemoUsersData();
+            }
+            throw error;
+        }
+    }
+
+    // Crear producto
+    async function createProduct(productData) {
+        try {
+            const data = await apiCall('/productos', {
+                method: 'POST',
+                body: JSON.stringify(productData)
+            });
+            return data;
+        } catch (error) {
+            console.error('Error creating product:', error);
+            throw error;
+        }
+    }
+
+    // Crear movimiento
+    async function createMovement(movementData) {
+        try {
+            const data = await apiCall('/movimientos', {
+                method: 'POST',
+                body: JSON.stringify(movementData)
+            });
+            return data;
+        } catch (error) {
+            console.error('Error creating movement:', error);
+            throw error;
+        }
+    }
+
+    // ==================== FUNCIONES DE UI ====================
+
+    // Mostrar/ocultar loading
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    // Mostrar error
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Mostrar éxito
+    function showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'alert alert-success';
+        successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        
+        document.querySelector('.main-content').prepend(successDiv);
+        
+        setTimeout(() => {
+            successDiv.remove();
+        }, 3000);
+    }
+
+    // Formatear moneda
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN'
+        }).format(amount || 0);
+    }
+
+    // Formatear fecha
+    function formatDate(dateString) {
+        if (!dateString) return '';
+
+        // Algunos timestamps incluyen microsegundos (6 dígitos) que pueden producir "Invalid Date".
+        // Normalizamos a milisegundos (3 dígitos) si es necesario.
+        try {
+            let s = String(dateString);
+            // Reemplaza más de 3 dígitos en la fracción de segundo por solo 3 (milisegundos)
+            s = s.replace(/(\.\d{3})\d+/, '$1');
+
+            // Intentar parsear
+            let date = new Date(s);
+            if (isNaN(date)) {
+                // Si sigue inválido, quitar la fracción por completo
+                s = s.replace(/\.\d+/, '');
+                date = new Date(s);
+            }
+
+            if (isNaN(date)) return '';
+
+            return date.toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            console.error('Error formateando fecha:', e, dateString);
+            return '';
+        }
+    }
+
+    // (Eliminado) La generación de avatar ha sido retirada del UI.
+
+    // ==================== ACTUALIZACIÓN DE UI ====================
+
+    // Actualizar dashboard
+    function updateDashboardUI(data) {
+        console.log('Actualizando dashboard con:', data);
+        
+        if (!data || !data.success) {
+            showError('Error al cargar el dashboard');
+            return;
+        }
+        
+        const stats = data.data.estadisticas || {};
+        const movements = data.data.movimientos_recientes || [];
+        const lowStock = data.data.productos_stock_bajo || [];
+        
+        // Actualizar tarjetas
+        document.getElementById('total-products').textContent = stats.total_productos || 0;
+        document.getElementById('low-stock-products').textContent = stats.productos_stock_bajo || 0;
+        document.getElementById('today-movements').textContent = stats.movimientos_hoy || 0;
+        document.getElementById('inventory-value').textContent = formatCurrency(stats.valor_inventario || 0);
+        
+        // Actualizar tabla de movimientos
+        const movementsTable = document.getElementById('recent-movements-table');
+        if (movements.length > 0) {
+            movementsTable.innerHTML = movements.map(movement => {
+                const producto = movement.producto ? (movement.producto.nombre || movement.producto.codigo) : (movement.producto || 'N/A');
+                const tipoName = movement.tipo_movimiento ? movement.tipo_movimiento.nombre : (movement.tipo || (movement.signo === 1 ? 'Entrada' : 'Salida'));
+                const usuario = movement.usuario ? (movement.usuario.nombre_completo || movement.usuario.username) : 'Sistema';
+                const fecha = movement.created_at ? formatDate(movement.created_at) : '';
+
+                return `
+                <tr>
+                    <td>${producto}</td>
+                    <td><span class="badge ${(tipoName === 'Entrada' || (movement.tipo_movimiento && movement.tipo_movimiento.signo === 1)) ? 'success' : 'danger'}">
+                        ${tipoName}
+                    </span></td>
+                    <td>${movement.cantidad || 0}</td>
+                    <td>${fecha}</td>
+                    <td>${usuario}</td>
+                </tr>`;
+            }).join('');
+        } else {
+            movementsTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay movimientos recientes</td></tr>';
+        }
+        
+        // Actualizar tabla de stock bajo
+        const lowStockTable = document.getElementById('low-stock-table');
+        if (lowStock.length > 0) {
+            lowStockTable.innerHTML = lowStock.map(product => `
+                <tr>
+                    <td>${product.nombre || product.codigo || 'N/A'}</td>
+                    <td>${product.stock_actual || 0}</td>
+                    <td>${product.stock_minimo || 0}</td>
+                    <td><span class="badge danger">Stock Bajo</span></td>
+                </tr>
+            `).join('');
+        } else {
+            lowStockTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay productos con stock bajo</td></tr>';
+        }
+    }
+
+    // Actualizar productos
+    function updateProductsUI(products) {
+        console.log('Actualizando productos:', products);
+        
+        const table = document.getElementById('products-table');
+        if (!products || !products.data || products.data.length === 0) {
+            table.innerHTML = '<tr><td colspan="7" style="text-align: center;">No hay productos registrados</td></tr>';
+            return;
+        }
+        
+        table.innerHTML = products.data.map(product => {
+            // Mostrar nombre de categoría si viene como objeto
+            let categoriaNombre = 'Sin categoría';
+            if (product.categoria) {
+                if (typeof product.categoria === 'object' && product.categoria !== null) {
+                    categoriaNombre = product.categoria.nombre || product.categoria.descripcion || String(product.categoria.id || 'Sin categoría');
+                } else {
+                    categoriaNombre = product.categoria;
+                }
+            }
+
+            return `
+            <tr>
+                <td>${product.codigo || 'N/A'}</td>
+                <td>${product.nombre || 'Sin nombre'}</td>
+                <td>${categoriaNombre}</td>
+                <td>${product.stock_actual || 0}</td>
+                <td>${formatCurrency(product.precio_venta || 0)}</td>
+                <td>
+                    <span class="badge ${(product.stock_actual || 0) < (product.stock_minimo || 1) ? 'danger' : 'success'}">
+                        ${(product.stock_actual || 0) < (product.stock_minimo || 1) ? 'Stock Bajo' : 'En Stock'}
+                    </span>
+                </td>
+                <td>
+                    <button class="edit-btn" onclick="editProduct(${product.id})"><i class="fas fa-edit"></i></button>
+                    <button class="delete-btn" onclick="deleteProduct(${product.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Actualizar movimientos
+    function updateMovementsUI(movements) {
+        console.log('Actualizando movimientos:', movements);
+        
+        const table = document.getElementById('movements-table');
+        if (!movements || !movements.data || movements.data.length === 0) {
+            table.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay movimientos registrados</td></tr>';
+            return;
+        }
+        
+        table.innerHTML = movements.data.map(movement => {
+            const producto = movement.producto ? (movement.producto.nombre || movement.producto.codigo) : (movement.producto || 'N/A');
+            const tipoName = movement.tipo_movimiento ? movement.tipo_movimiento.nombre : (movement.tipo || (movement.signo === 1 ? 'Entrada' : 'Salida'));
+            const usuario = movement.usuario ? (movement.usuario.nombre_completo || movement.usuario.username) : 'Sistema';
+            const fecha = movement.created_at ? formatDate(movement.created_at) : '';
+
+            return `
+            <tr>
+                <td>${producto}</td>
+                <td><span class="badge ${(tipoName === 'Entrada' || (movement.tipo_movimiento && movement.tipo_movimiento.signo === 1)) ? 'success' : 'danger'}">
+                    ${tipoName}
+                </span></td>
+                <td>${movement.cantidad || 0}</td>
+                <td>${fecha}</td>
+                <td>${usuario}</td>
+                <td>${movement.motivo || 'Sin motivo especificado'}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // Alerts UI removed
+
+    // Actualizar usuarios
+    function updateUsersUI(users) {
+        console.log('Actualizando usuarios:', users);
+        
+        const table = document.getElementById('users-table');
+        if (!users || !users.data || users.data.length === 0) {
+            table.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados</td></tr>';
+            return;
+        }
+        
+        table.innerHTML = users.data.map(user => {
+            // Manejar rol que puede venir como objeto o string
+            let roleName = 'Sin rol';
+            if (user.rol) {
+                if (typeof user.rol === 'object' && user.rol !== null) {
+                    roleName = user.rol.nombre || user.rol.descripcion || String(user.rol.id || 'Sin rol');
+                } else {
+                    roleName = user.rol;
+                }
+            }
+
+            // Determinar clase del badge según roleName
+            let roleBadge = 'primary';
+            const rn = String(roleName).toLowerCase();
+            if (rn === 'admin' || rn === 'administrador') roleBadge = 'danger';
+            else if (rn === 'supervisor') roleBadge = 'warning';
+
+            return `
+            <tr>
+                <td>${user.username || 'N/A'}</td>
+                <td>${user.email || 'Sin email'}</td>
+                <td><span class="badge ${roleBadge}">${roleName}</span></td>
+                <td><span class="badge ${user.activo ? 'success' : 'danger'}">${user.activo ? 'Activo' : 'Inactivo'}</span></td>
+                <td>${user.ultimo_acceso ? formatDate(user.ultimo_acceso) : 'Nunca'}</td>
+                <td>
+                    <button class="edit-btn" onclick="editUser(${user.id})"><i class="fas fa-edit"></i></button>
+                    <button class="delete-btn" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ==================== SISTEMA DE NAVEGACIÓN ====================
+
+    function setupNavigation() {
+        const menuItems = document.querySelectorAll('.sidebar-menu li');
+        const sections = document.querySelectorAll('.section');
+        const sectionTitle = document.getElementById('section-title');
+        
+        const sectionTitles = {
+            'dashboard': 'Dashboard',
+            'products': 'Gestión de Productos',
+            'movements': 'Registro de Movimientos',
+            'reports': 'Reportes de Inventario',
+            'users': 'Gestión de Usuarios'
+        };
+        
+        function changeSection(sectionId) {
+            // Guardar última sección
+            storage.setLastSection(sectionId);
+            
+            // Ocultar todas las secciones
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar sección activa
+            const activeSection = document.getElementById(sectionId);
+            if (activeSection) {
+                activeSection.classList.add('active');
+            }
+            
+            // Actualizar título
+            sectionTitle.textContent = sectionTitles[sectionId] || 'Sistema de Inventario';
+            
+            // Actualizar menú activo
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Cargar datos de la sección
+            loadSectionData(sectionId);
+        }
+        
+        // Configurar clics en menú
+        menuItems.forEach(item => {
+            if (item.getAttribute('data-section')) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId !== 'logout') {
+                        changeSection(sectionId);
+                    }
+                });
+            }
+        });
+        
+        // Configurar logout
+        document.getElementById('logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+        
+        // Configurar botones de acción
+        setupActionButtons();
+        
+        return { changeSection };
+    }
+
+    // Configurar botones de acción
+    function setupActionButtons() {
+        // Botón agregar producto
+        const addProductBtn = document.getElementById('add-product-btn');
+        if (addProductBtn) {
+            addProductBtn.addEventListener('click', () => showProductForm());
+        }
+        
+        // Botones entrada/salida
+        const addEntryBtn = document.getElementById('add-entry-btn');
+        const addExitBtn = document.getElementById('add-exit-btn');
+        
+        if (addEntryBtn) addEntryBtn.addEventListener('click', () => showMovementForm('entry'));
+        if (addExitBtn) addExitBtn.addEventListener('click', () => showMovementForm('exit'));
+        
+        // Botón agregar usuario
+        const addUserBtn = document.getElementById('add-user-btn');
+        if (addUserBtn) {
+            addUserBtn.addEventListener('click', () => showUserForm());
+        }
+    }
+
+    // ==================== CARGA DE DATOS ====================
+
+    async function loadSectionData(sectionId) {
+        try {
+            showLoading();
+            
+            switch(sectionId) {
+                case 'dashboard':
+                    const dashboardData = await loadDashboard();
+                    updateDashboardUI(dashboardData);
+                    break;
+                    
+                case 'products':
+                    const productsData = await loadProducts();
+                    updateProductsUI(productsData);
+                    break;
+                    
+                case 'movements':
+                    const movementsData = await loadMovements();
+                    updateMovementsUI(movementsData);
+                    break;
+
+                case 'users':
+                    const usersData = await loadUsers();
+                    updateUsersUI(usersData);
+                    break;
+
+                case 'reports':
+                    // Por ahora solo mostrar placeholder
+                    break;
+            }
+        } catch (error) {
+            console.error(`Error cargando sección ${sectionId}:`, error);
+            showError(`Error: ${error.message}`);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // ==================== DATOS DE DEMO (para cuando no hay backend) ====================
+
+    function getDemoDashboardData() {
+        return {
+            success: true,
+            data: {
+                estadisticas: {
+                    total_productos: 1254,
+                    productos_stock_bajo: 23,
+                    movimientos_hoy: 156,
+                    valor_inventario: 45678
+                },
+                movimientos_recientes: [
+                    {
+                        producto: 'Laptop HP Pavilion',
+                        tipo: 'Entrada',
+                        signo: 1,
+                        cantidad: 10,
+                        fecha: '2023-05-15',
+                        usuario: 'admin'
+                    },
+                    {
+                        producto: 'Mouse Inalámbrico',
+                        tipo: 'Salida',
+                        signo: -1,
+                        cantidad: 5,
+                        fecha: '2023-05-16',
+                        usuario: 'operador'
+                    },
+                    {
+                        producto: 'Camisa Casual',
+                        tipo: 'Entrada',
+                        signo: 1,
+                        cantidad: 20,
+                        fecha: '2023-05-17',
+                        usuario: 'admin'
+                    }
+                ],
+                productos_stock_bajo: [
+                    {
+                        nombre: 'Camisa Casual',
+                        stock_actual: 8,
+                        stock_minimo: 15
+                    },
+                    {
+                        nombre: 'Juego de Mesa',
+                        stock_actual: 5,
+                        stock_minimo: 8
+                    }
+                ]
+            }
+        };
+    }
+
+    function getDemoProductsData() {
+        return {
+            success: true,
+            data: [
+                {
+                    id: 1,
+                    codigo: 'PROD-001',
+                    nombre: 'Laptop HP Pavilion',
+                    categoria: 'Electrónicos',
+                    stock_actual: 15,
+                    stock_minimo: 10,
+                    precio_venta: 12500
+                },
+                {
+                    id: 2,
+                    codigo: 'PROD-002',
+                    nombre: 'Mouse Inalámbrico',
+                    categoria: 'Electrónicos',
+                    stock_actual: 45,
+                    stock_minimo: 20,
+                    precio_venta: 350.00
+                },
+                {
+                    id: 3,
+                    codigo: 'PROD-003',
+                    nombre: 'Camisa Casual',
+                    categoria: 'Ropa',
+                    stock_actual: 8,
+                    stock_minimo: 15,
+                    precio_venta: 450.00
+                }
+            ]
+        };
+    }
+
+    function getDemoMovementsData() {
+        return {
+            success: true,
+            data: [
+                {
+                    producto: 'Laptop HP Pavilion',
+                    tipo: 'Entrada',
+                    signo: 1,
+                    cantidad: 10,
+                    fecha: '2023-05-15',
+                    usuario: 'admin',
+                    motivo: 'Compra a proveedor'
+                },
+                {
+                    producto: 'Mouse Inalámbrico',
+                    tipo: 'Salida',
+                    signo: -1,
+                    cantidad: 5,
+                    fecha: '2023-05-16',
+                    usuario: 'operador',
+                    motivo: 'Venta a cliente'
+                },
+                {
+                    producto: 'Camisa Casual',
+                    tipo: 'Entrada',
+                    signo: 1,
+                    cantidad: 20,
+                    fecha: '2023-05-17',
+                    usuario: 'admin',
+                    motivo: 'Compra a proveedor'
+                }
+            ]
+        };
+    }
+
+    // getDemoAlertsData removed (alerts UI removed)
+
+    function getDemoUsersData() {
+        return {
+            success: true,
+            data: [
+                {
+                    id: 1,
+                    username: 'admin',
+                    email: 'admin@empresa.com',
+                    rol: 'admin',
+                    activo: true,
+                    ultimo_acceso: '2023-05-20T14:30:00'
+                },
+                {
+                    id: 2,
+                    username: 'supervisor',
+                    email: 'supervisor@empresa.com',
+                    rol: 'supervisor',
+                    activo: true,
+                    ultimo_acceso: '2023-05-19T10:15:00'
+                },
+                {
+                    id: 3,
+                    username: 'operador',
+                    email: 'operador@empresa.com',
+                    rol: 'operator',
+                    activo: true,
+                    ultimo_acceso: '2023-05-18T16:45:00'
+                }
+            ]
+        };
+    }
+
+    // ==================== FORMULARIOS ====================
+
+    function showProductForm(product = null) {
+        const formHTML = `
+            <div class="form-container">
+                <h2>${product ? 'Editar Producto' : 'Nuevo Producto'}</h2>
+                <form id="product-form">
+                    <div class="form-group">
+                        <label for="product-code">Código</label>
+                        <input type="text" id="product-code" value="${product ? product.codigo : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-name">Nombre</label>
+                        <input type="text" id="product-name" value="${product ? product.nombre : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">Categoría</label>
+                        <input type="text" id="product-category" value="${product ? product.categoria : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock">Stock Actual</label>
+                        <input type="number" id="product-stock" value="${product ? product.stock_actual : 0}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-min-stock">Stock Mínimo</label>
+                        <input type="number" id="product-min-stock" value="${product ? product.stock_minimo : 0}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Precio</label>
+                        <input type="number" step="0.01" id="product-price" value="${product ? product.precio_venta : 0}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description">Descripción</label>
+                        <textarea id="product-description">${product ? product.descripcion || '' : ''}</textarea>
+                    </div>
+                    <button type="submit" class="btn-success">${product ? 'Actualizar' : 'Guardar'}</button>
+                    <button type="button" onclick="hideForm()" class="btn-danger">Cancelar</button>
+                </form>
+            </div>
+        `;
+        
+        document.getElementById('products').innerHTML = formHTML + document.getElementById('products').innerHTML;
+        setupProductForm(product);
+    }
+
+    function setupProductForm(product) {
+        const form = document.getElementById('product-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const productData = {
+                    codigo: document.getElementById('product-code').value,
+                    nombre: document.getElementById('product-name').value,
+                    categoria: document.getElementById('product-category').value,
+                    stock_actual: parseInt(document.getElementById('product-stock').value),
+                    stock_minimo: parseInt(document.getElementById('product-min-stock').value),
+                    precio_venta: parseFloat(document.getElementById('product-price').value),
+                    descripcion: document.getElementById('product-description').value
+                };
+                
+                try {
+                    if (product) {
+                        // Actualizar producto
+                        await apiCall(`/productos/${product.id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(productData)
+                        });
+                        showSuccess('Producto actualizado correctamente');
+                    } else {
+                        // Crear producto
+                        await createProduct(productData);
+                        showSuccess('Producto creado correctamente');
+                    }
+                    
+                    // Recargar productos
+                    loadSectionData('products');
+                } catch (error) {
+                    showError(error.message);
+                }
+            });
+        }
+    }
+
+    function showMovementForm(type) {
+        const formHTML = `
+            <div class="form-container">
+                <h2>${type === 'entry' ? 'Registrar Entrada' : 'Registrar Salida'}</h2>
+                <form id="movement-form">
+                    <div class="form-group">
+                        <label for="movement-product">Producto</label>
+                        <select id="movement-product" required>
+                            <option value="">Seleccionar producto...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="movement-quantity">Cantidad</label>
+                        <input type="number" id="movement-quantity" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="movement-reason">Motivo</label>
+                        <input type="text" id="movement-reason" placeholder="Ej: Compra a proveedor, Venta a cliente...">
+                    </div>
+                    <div class="form-group">
+                        <label for="movement-reference">Referencia</label>
+                        <input type="text" id="movement-reference" placeholder="Número de factura, orden...">
+                    </div>
+                    <input type="hidden" id="movement-type" value="${type}">
+                    <button type="submit" class="btn-success">Registrar</button>
+                    <button type="button" onclick="hideForm()" class="btn-danger">Cancelar</button>
+                </form>
+            </div>
+        `;
+        
+        document.getElementById('movements').innerHTML = formHTML + document.getElementById('movements').innerHTML;
+        setupMovementForm();
+    }
+
+    async function setupMovementForm() {
+        // Cargar productos para el select
+        try {
+            const products = await loadProducts();
+            const select = document.getElementById('movement-product');
+            
+            if (products.data && products.data.length > 0) {
+                select.innerHTML = '<option value="">Seleccionar producto...</option>' + 
+                    products.data.map(p => `<option value="${p.id}">${p.nombre} (Stock: ${p.stock_actual})</option>`).join('');
+            }
+        } catch (error) {
+            console.error('Error cargando productos:', error);
+        }
+        
+        const form = document.getElementById('movement-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const movementData = {
+                    producto_id: parseInt(document.getElementById('movement-product').value),
+                    tipo_movimiento_id: document.getElementById('movement-type').value === 'entry' ? 1 : 2, // 1: compra, 2: venta
+                    cantidad: parseInt(document.getElementById('movement-quantity').value),
+                    motivo: document.getElementById('movement-reason').value,
+                    referencia: document.getElementById('movement-reference').value
+                };
+                
+                try {
+                    await createMovement(movementData);
+                    showSuccess('Movimiento registrado correctamente');
+                    
+                    // Recargar movimientos
+                    loadSectionData('movements');
+                } catch (error) {
+                    showError(error.message);
+                }
+            });
+        }
+    }
+
+    function showUserForm(user = null) {
+        // Similar a showProductForm pero para usuarios
+        // Implementar según necesidad
+        alert('Formulario de usuario en desarrollo');
+    }
+
+    function hideForm() {
+        // Recargar la sección actual
+        const activeSection = document.querySelector('.section.active');
+        if (activeSection) {
+            const sectionId = activeSection.id;
+            loadSectionData(sectionId);
+        }
+    }
+
+    // ==================== FUNCIONES DE ACCIÓN ====================
+
+    // Editar producto
+    function editProduct(productId) {
+        // Implementar lógica de edición
+        alert(`Editar producto ${productId}`);
+    }
+
+    // Eliminar producto
+    async function deleteProduct(productId) {
+        if (confirm('¿Está seguro de eliminar este producto?')) {
+            try {
+                await apiCall(`/productos/${productId}`, { method: 'DELETE' });
+                showSuccess('Producto eliminado correctamente');
+                loadSectionData('products');
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+    }
+
+    // Editar usuario
+    function editUser(userId) {
+        // Implementar lógica de edición
+        alert(`Editar usuario ${userId}`);
+    }
+
+    // Eliminar usuario
+    async function deleteUser(userId) {
+        if (confirm('¿Está seguro de eliminar este usuario?')) {
+            try {
+                await apiCall(`/usuarios/${userId}`, { method: 'DELETE' });
+                showSuccess('Usuario eliminado correctamente');
+                loadSectionData('users');
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+    }
+
+    // ==================== INICIALIZACIÓN ====================
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Inicializando aplicación...');
+        
+        // Configurar login
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                const result = await login(username, password);
+                
+                if (result.success) {
+                    // Ocultar login y mostrar aplicación
+                    document.getElementById('login-page').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    
+                    // Actualizar información del usuario
+                    const user = result.user;
+                    document.getElementById('user-name').textContent = user.nombre_completo;
+                    document.getElementById('user-role').textContent = user.rol;
+                    // Avatar removed: no updateUserAvatar call here
+                    
+                    // Configurar navegación
+                    const nav = setupNavigation();
+                    
+                    // Cargar última sección o dashboard
+                    const lastSection = storage.getLastSection();
+                    nav.changeSection(lastSection);
+                    
+                } else {
+                    showError(result.error);
+                }
+            });
+        }
+        
+        // Verificar si ya está autenticado
+        if (checkAuth()) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            
+            const user = storage.getUser();
+            document.getElementById('user-name').textContent = user.nombre_completo;
+            document.getElementById('user-role').textContent = user.rol;
+                    // Avatar removed: no updateUserAvatar call
+            
+            const nav = setupNavigation();
+            const lastSection = storage.getLastSection();
+            nav.changeSection(lastSection);
+        }
+    });
+</script>
+</body>
+</html>
